@@ -39,7 +39,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   
     res.status(404).send('Sorry, page not found');
 });
