@@ -6,7 +6,7 @@
 
 ## WRRC
 
-![WRRC](WRRRC1.jpg)
+![WRRC](WRRC3.jpg)
 
 ## Overview
 
