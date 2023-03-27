@@ -21,6 +21,86 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+
+
+
+//NEW CODE FOR LAB 14 
+
+
+
+
+
+app.put('/updateMovie/:id', (req, res) => {
+  const { id } = req.params;
+  const { comments } = req.body;
+
+  const sql = `UPDATE movies SET comments = $1 WHERE id = $2 RETURNING *`;
+
+  const values = [comments, id];
+
+  client.query(sql, values)
+    .then((result) => {
+      if (result.rows.length === 0) {
+        res.status(404).send(`Movie with id ${id} not found`);
+      } else {
+        res.status(200).json(result.rows[0]);
+      }
+    })
+    .catch((err) => {
+      console.error(`Error updating movie with id ${id}`, err);
+      res.status(500).send(`Error updating movie with id ${id}`);
+    });
+});
+
+app.delete('/deleteMovie/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `DELETE FROM movies WHERE id = $1 RETURNING *`;
+
+  const values = [id];
+
+  client.query(sql, values)
+    .then((result) => {
+      if (result.rows.length === 0) {
+        res.status(404).send(`Movie with id ${id} not found`);
+      } else {
+        res.status(200).send(`Movie with id ${id} deleted`);
+      }
+    })
+    .catch((err) => {
+      console.error(`Error deleting movie with id ${id}`, err);
+      res.status(500).send(`Error deleting movie with id ${id}`);
+    });
+});
+
+// Get a specific movie from the database
+app.get('/getMovie/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `SELECT * FROM movies WHERE id = $1`;
+
+  const values = [id];
+
+  client.query(sql, values)
+    .then((result) => {
+      if (result.rows.length === 0) {
+        res.status(404).send(`Movie with id ${id} not found`);
+      } else {
+        res.status(200).json(result.rows[0]);
+      }
+    })
+    .catch((err) => {
+      console.error(`Error getting movie with id ${id}`, err);
+      res.status(500).send(`Error getting movie with id ${id}`);
+    });
+});
+
+
+
+
+
+
+
 client.connect()
   .then(() => {
     console.log('Connected to database');
