@@ -52,6 +52,9 @@ app.put('/updateMovie/:id', (req, res) => {
     });
 });
 
+
+
+
 app.delete('/deleteMovie/:id', (req, res) => {
   const { id } = req.params;
 
@@ -72,6 +75,8 @@ app.delete('/deleteMovie/:id', (req, res) => {
       res.status(500).send(`Error deleting movie with id ${id}`);
     });
 });
+
+
 
 // Get a specific movie from the database
 app.get('/getMovie/:id', (req, res) => {
@@ -116,23 +121,24 @@ client.connect()
     console.error('Error connecting to database', err);
   });
 
-app.post('/addMovie', (req, res) => {
-  const { title, director, year, comments } = req.body;
-
-  const sql = `INSERT INTO movies (title, director, year, comments) 
-               VALUES ($1, $2, $3, $4) RETURNING *`;
-
-  const values = [title, director, year, comments];
-
-  client.query(sql, values)
-    .then((result) => {
-      res.status(201).json(result.rows[0]);
-    })
-    .catch((err) => {
-      console.error('Error adding movie to database', err);
-      res.status(500).send('Error adding movie to database');
-    });
-});
+  app.post('/addMovie', (req, res) => {
+    const { title, director, year, comments } = req.body;
+  
+    const sql = `INSERT INTO movies (id, title, director, year, comments) 
+                 VALUES (DEFAULT, $1, $2, $3, $4) RETURNING *`;
+  
+    const values = [title, director, year, comments];
+  
+    client.query(sql, values)
+      .then((result) => {
+        res.status(201).json(result.rows[0]);
+      })
+      .catch((err) => {
+        console.error('Error adding movie to database', err);
+        res.status(500).send('Error adding movie to database');
+      });
+  });
+  
 
 app.get('/getMovies', (req, res) => {
   const sql = 'SELECT * FROM movies';
