@@ -1,49 +1,105 @@
-'use strict';
-const express = require('express');
-const movieData = require('./data.json');
+express = require('express');
+const axios = require('axios');
 
 const app = express();
-const port = 3001;
+const port = 3000;
 
-function Movie(title, poster_path, overview) {
-  this.title = title;
-  this.poster_path = poster_path;
-  this.overview = overview;
-}
+const apiKey = '42572ed793451532e1bec6fcb8de077b';
 
-app.get('/', (req, res) => {
-  
-    const movies = movieData.map(movie =>
-         new Movie(movie.title, movie.poster_path, movie.overview));
-  
-    res.json(movies);
+app.get('/trending', (req, res) => {
+  const apiUrl = 'https://api.themoviedb.org/3/trending/movie/week';
+
+  axios
+    .get(apiUrl, {
+      params: {
+        api_key: apiKey,
+      },
+    })
+    .then((response) => {
+      const movie = response.data.results[0];
+
+      const formattedData = {
+        id: movie.id,
+        title: movie.title,
+        release_date: movie.release_date,
+        poster_path: movie.poster_path,
+        overview: movie.overview,
+      };
+
+      res.send(formattedData);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error occurred while fetching trending movie information');
+    });
 });
 
+app.get('/search', (req, res) => {
+  const apiUrl = 'https://api.themoviedb.org/3/search/movie';
 
+  const query = req.query.q;
 
+  axios
+    .get(apiUrl, {
+      params: {
+        api_key: apiKey,
+        query: query,
+      },
+    })
+    .then((response) => {
+      const movie = response.data.results[0];
 
-app.get('/favorite', (req, res) => {
-  
-  
-  res.send('Welcome to Favorite Page');
+      const formattedData = {
+        id: movie.id,
+        title: movie.title,
+        release_date: movie.release_date,
+        poster_path: movie.poster_path,
+        overview: movie.overview,
+      };
+
+      res.send(formattedData);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error occurred while searching for movie');
+    });
 });
 
-console.log()
+app.get('/popular', (req, res) => {
+  const apiUrl = 'https://api.themoviedb.org/3/movie/popular';
 
+  axios
+    .get(apiUrl, {
+      params: {
+        api_key: apiKey,
+      },
+    })
+    .then((response) => {
+      const movies = response.data.results.map((movie) => {
+        const formattedData = {
+          id: movie.id,
+          title: movie.title,
+          release_date: movie.release_date,
+          poster_path: movie.poster_path,
+          overview: movie.overview,
+        };
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    status: 500,
-    responseText: 'Sorry, something went wrong'
-  });
-});
+        return formattedData;
+      });
 
-app.use((req, res) => {
-  
-    res.status(404).send('Sorry, page not found');
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+      res.send(movies);
+    })
+    .catch
+    ((error) => {
+      console.error(error);
+      res.status(500).send('Error occurred while fetching popular movies');
+      });
+      });
+      
+      app.listen(port, () => {
+      console.log(`Server listening at http://localhost:${port}`);
+      });
+      
+      
+      
+      
