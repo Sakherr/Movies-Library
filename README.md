@@ -6,7 +6,7 @@
 
 ## WRRC
 
-![WRRC](WRRC3.jpg)
+![WRRC](WRRCC.jpg)
 
 ## Overview
 
@@ -22,11 +22,21 @@
 7.NPM doc
 8.Dotenv
 9.axios
+10. npm install pg // to make sql languge run inside my server 
+
 
 
 ## Project Features
-this server have  Home Page Endpoint: /  that Respons is  title , poster_path ,overview
-and the Favorite Page Endpoint: “/favorite  Respons  Welcome to Favorite Page and Handle errors
-that Respons  status code and  responseText like "Sorry, something went wrong"
-
-now my server use 3thd paert API si it can retrive the data drom this API and no needed to save the data insider the server.
+A RESTful API built using Node.js and Express.js
+Connects to a PostgreSQL database to perform CRUD operations on data
+Has two endpoints:
+/addMovie: Creates a POST request to save a specific movie to the database along with personal comments
+/getMovies: Creates a GET request to get all the data from the database
+Uses body-parser middleware to parse incoming request bodies in a middleware before your handlers, available under the req.body property
+Uses cors middleware to enable Cross-Origin Resource Sharing
+Uses the dotenv package to load environment variables from a .env file
+Uses error handling middleware to handle errors and return a 500 status code
+Uses destructuring to extract properties from the request body
+Uses promises to handle asynchronous database queries and catch errors
+Uses the Client class from the pg package to connect to a PostgreSQL database
+Uses SQL statements to perform CRUD operations on the database

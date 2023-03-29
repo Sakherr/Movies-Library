@@ -1,105 +1,72 @@
-express = require('express');
-const axios = require('axios');
+'use strict';
+
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const { Client } = require('pg');
+const fs = require('fs');
+const path = require('path');
+
+require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
-const apiKey = '42572ed793451532e1bec6fcb8de077b';
+const dbSchemaPath = path.join(__dirname, 'schema.sql');
+const dbSchema = fs.readFileSync(dbSchemaPath).toString();
 
-app.get('/trending', (req, res) => {
-  const apiUrl = 'https://api.themoviedb.org/3/trending/movie/week';
+const client = new Client(process.env.DATABASE_URL);
 
-  axios
-    .get(apiUrl, {
-      params: {
-        api_key: apiKey,
-      },
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+client.connect()
+  .then(() => {
+    console.log('Connected to database');
+    client.query(dbSchema)
+      .then(() => {
+        console.log('Database schema created');
+      })
+      .catch((err) => {
+        console.error('Error creating database schema', err);
+      });
+  })
+  .catch((err) => {
+    console.error('Error connecting to database', err);
+  });
+
+app.post('/addMovie', (req, res) => {
+  const { title, director, year, comments } = req.body;
+
+  const sql = `INSERT INTO movies (title, director, year, comments) 
+               VALUES ($1, $2, $3, $4) RETURNING *`;
+
+  const values = [title, director, year, comments];
+
+  client.query(sql, values)
+    .then((result) => {
+      res.status(201).json(result.rows[0]);
     })
-    .then((response) => {
-      const movie = response.data.results[0];
-
-      const formattedData = {
-        id: movie.id,
-        title: movie.title,
-        release_date: movie.release_date,
-        poster_path: movie.poster_path,
-        overview: movie.overview,
-      };
-
-      res.send(formattedData);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('Error occurred while fetching trending movie information');
+    .catch((err) => {
+      console.error('Error adding movie to database', err);
+      res.status(500).send('Error adding movie to database');
     });
 });
 
-app.get('/search', (req, res) => {
-  const apiUrl = 'https://api.themoviedb.org/3/search/movie';
+app.get('/getMovies', (req, res) => {
+  const sql = 'SELECT * FROM movies';
 
-  const query = req.query.q;
-
-  axios
-    .get(apiUrl, {
-      params: {
-        api_key: apiKey,
-        query: query,
-      },
+  client.query(sql)
+    .then((result) => {
+      res.status(200).json(result.rows);
     })
-    .then((response) => {
-      const movie = response.data.results[0];
-
-      const formattedData = {
-        id: movie.id,
-        title: movie.title,
-        release_date: movie.release_date,
-        poster_path: movie.poster_path,
-        overview: movie.overview,
-      };
-
-      res.send(formattedData);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('Error occurred while searching for movie');
+    .catch((err) => {
+      console.error('Error getting movies from database', err);
+      res.status(500).send('Error getting movies from database');
     });
 });
 
-app.get('/popular', (req, res) => {
-  const apiUrl = 'https://api.themoviedb.org/3/movie/popular';
-
-  axios
-    .get(apiUrl, {
-      params: {
-        api_key: apiKey,
-      },
-    })
-    .then((response) => {
-      const movies = response.data.results.map((movie) => {
-        const formattedData = {
-          id: movie.id,
-          title: movie.title,
-          release_date: movie.release_date,
-          poster_path: movie.poster_path,
-          overview: movie.overview,
-        };
-
-        return formattedData;
-      });
-
-      res.send(movies);
-    })
-    .catch
-    ((error) => {
-      console.error(error);
-      res.status(500).send('Error occurred while fetching popular movies');
-      });
-      });
-      
-      app.listen(port, () => {
-      console.log(`Server listening at http://localhost:${port}`);
-      });
-      
-      
-      
-      
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
