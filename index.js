@@ -10,7 +10,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 const dbSchemaPath = path.join(__dirname, 'schema.sql');
 const dbSchema = fs.readFileSync(dbSchemaPath).toString();
