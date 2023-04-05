@@ -1,7 +1,7 @@
 # Movies-Library
 
 
-
+###DROP TABLE IF EXISTS moiv
 **Author Name**: Saker Ahmad 
 
 ## WRRC
