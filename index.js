@@ -6,10 +6,111 @@ const bodyParser = require('body-parser');
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
-
+const axios = require('axios');
 require('dotenv').config();
 
+const apiKey = '42572ed793451532e1bec6fcb8de077b';
 const app = express();
+
+app.get('/trending', (req, res) => {
+  const apiUrl = 'https://api.themoviedb.org/3/trending/movie/week';
+
+  axios
+    .get(apiUrl, {
+      params: {
+        api_key: apiKey,
+      },
+    })
+    .then((response) => {
+      const movie = response.data.results[0];
+
+      const formattedData = {
+        id: movie.id,
+        title: movie.title,
+        release_date: movie.release_date,
+        poster_path: movie.poster_path,
+        overview: movie.overview,
+      };
+
+      res.send(formattedData);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error occurred while fetching trending movie information');
+    });
+});
+
+
+
+app.get('/search', (req, res) => {
+  const apiUrl = 'https://api.themoviedb.org/3/search/movie';
+
+  const query = req.query.q;
+
+  axios
+    .get(apiUrl, {
+      params: {
+        api_key: apiKey,
+        query: query,
+      },
+    })
+    .then((response) => {
+      const movie = response.data.results[0];
+
+      const formattedData = {
+        id: movie.id,
+        title: movie.title,
+        release_date: movie.release_date,
+        poster_path: movie.poster_path,
+        overview: movie.overview,
+      };
+
+      res.send(formattedData);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error occurred while searching for movie');
+    });
+});
+
+
+
+app.get('/popular', (req, res) => {
+  const apiUrl = 'https://api.themoviedb.org/3/movie/popular';
+
+  axios
+    .get(apiUrl, {
+      params: {
+        api_key: apiKey,
+      },
+    })
+    .then((response) => {
+      const movies = response.data.results.map((movie) => {
+        const formattedData = {
+          id: movie.id,
+          title: movie.title,
+          release_date: movie.release_date,
+          poster_path: movie.poster_path,
+          overview: movie.overview,
+        };
+
+        return formattedData;
+      });
+
+      res.send(movies);
+    })
+    .catch
+    ((error) => {
+      console.error(error);
+      res.status(500).send('Error occurred while fetching popular movies');
+      });
+      });
+
+
+
+
+
+
 const PORT = process.env.PORT || 3001;
 
 const dbSchemaPath = path.join(__dirname, 'schema.sql');
